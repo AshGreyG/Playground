@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Demo For Emoji Steganography</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="header">
+      <h2>🍃 Emoji Steganography</h2>
+    </header>
+    <main class="emoji-steg-container">
+      <div class="panel" id="encode-panel">
+        <div class="title-container">
+          <h3 class="title">Encode</h3>
+        </div>
+        <div class="input-container" id="emoji-carrier-container">
+          <label for="emoji-carrier" class="input-label">Emoji Carrier:</label>
+          <textarea
+            name="emoji-carrier"
+            id="emoji-carrier"
+            class="input-textarea"
+            placeholder="If empty, emoji carriers will be generated randomly.
+If plaintext has emojis then carriers will use emojis in plaintext"
+          ></textarea>
+        </div>
+        <div class="input-container" id="hidden-text-container">
+          <label for="hidden-text" class="input-label">Hidden Text:</label>
+          <textarea
+            name="hidden-text"
+            id="hidden-text"
+            class="input-textarea"
+          ></textarea>
+        </div>
+        <div class="input-container" id="plaintext-container">
+          <label for="plaintext" class="input-label">Plaintext:</label>
+          <textarea
+            name="plaintext"
+            id="plaintext"
+            class="input-textarea"
+          ></textarea>
+        </div>
+        <div class="output-container" id="encoded-output-container">
+          <label for="emoji-carrier" class="output-label">
+            Encoded Output:
+          </label>
+          <textarea
+            name="encoded-output"
+            id="encoded-output"
+            class="output-textarea"
+            disabled
+          ></textarea>
+        </div>
+        <div class="processing-button-container">
+          <div class="encode-button-container">
+            <button class="bg-btn" id="encode-btn" onclick="handleEncode()">
+              Encode
+            </button>
+          </div>
+          <div class="copy-button-container">
+            <button class="bd-btn" id="copy-btn" onclick="handleEncode()">
+              Copy
+            </button>
+          </div>
+        </div>
+      </div>
+      <div class="panel" id="decode-panel"></div>
+    </main>
+    <script src="scripts.js"></script>
+  </body>
+</html>
