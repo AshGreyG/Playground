@@ -263,7 +263,16 @@ class EmojiSteganography {
       }
     }
 
-    return emojiCarriers;
+    let encodedTextList = plaintext.split("");
+    let lastInsertedPos = 0;
+    emojiCarriers.forEach((encodedEmoji) => {
+      const minPos = lastInsertedPos;
+      const maxPos = encodedTextList.length;
+      const randomPos = Math.floor(Math.random() * (maxPos - minPos + 1)) + minPos;
+      encodedTextList.splice(randomPos, 0, encodedEmoji);
+    });
+
+    return encodedTextList.join("");
   }
 }
 
@@ -272,9 +281,14 @@ function handleEncode() {
   const _elementEmojiCarriers = document.querySelector("#emoji-carrier");
   /** @type {HTMLTextAreaElement} */
   const _elementPlaintext = document.querySelector("#plaintext");
+  /** @type {HTMLTextAreaElement} */
+  const _elementHiddenText = document.querySelector("#hidden-text");
+  /** @type {HTMLTextAreaElement} */
+  const _elementEncodedOutput = document.querySelector("#encoded-output");
 
   const emojiCarriers = _elementEmojiCarriers.value;
   const plaintext = _elementPlaintext.value;
+  const hiddenText = _elementHiddenText.value;
 
   const checkEmojiCarriers = EmojiSteganography.hasEmoji(emojiCarriers);
   const checkPlaintext = EmojiSteganography.hasEmoji(plaintext);
@@ -284,7 +298,12 @@ function handleEncode() {
     return;
   } else if (!checkEmojiCarriers && !checkPlaintext) {
     // When no emoji carriers and there is no emoji in plaintext, generate randomly
-
+    _elementEncodedOutput.value = EmojiSteganography.encodeWithRandom(
+      plaintext,
+      hiddenText,
+      3,
+      {}
+    );
   } else if (!checkEmojiCarriers && checkPlaintext) {
     // When no emoji carriers and there are emojis in plaintext, use plaintext
     const emojis = EmojiSteganography.getEmojiList(plaintext);
