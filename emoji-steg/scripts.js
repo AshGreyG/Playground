@@ -27,6 +27,10 @@ class EmojiSteganography {
     return [].concat(...Object.values(this.EMOJI_CONTROL));
   }
   /** @type {string[]} */
+  static get emojiControllersKey() {
+    return [].concat(...Object.keys(this.EMOJI_CONTROL).map(s => s + "Amount"));
+  }
+  /** @type {string[]} */
   static get variantSelectors() {
     /** @type {string[]} */
     const basicVariantSelectors = [];
@@ -116,6 +120,11 @@ class EmojiSteganography {
     }
     if (emojiAmount <= 0) {
       throw new RangeError("`emojiAmount` must be a positive number.");
+    }
+    for (const key in controllers) {
+      if (!this.emojiControllersKey.includes(key)) {
+        throw new TypeError(`Parameter \`controllers\` shouldn't have key \`${key}\``);
+      }
     }
 
     const encoder = new TextEncoder();
