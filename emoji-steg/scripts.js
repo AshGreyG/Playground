@@ -294,7 +294,7 @@ function handleEncode() {
   const checkPlaintext = EmojiSteganography.hasEmoji(plaintext);
 
   if (checkEmojiCarriers && checkPlaintext) {
-    alert("At most one of input 'Emoji Carrier' and 'Plaintext' should have emoji!");
+    alert("At most one of input 'Emoji Carrier' and 'Plaintext' should contain emoji!");
     return;
   } else if (!checkEmojiCarriers && !checkPlaintext) {
     // When no emoji carriers and there is no emoji in plaintext, generate randomly
