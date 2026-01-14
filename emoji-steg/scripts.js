@@ -114,6 +114,9 @@ class EmojiSteganography {
     if (typeof emojiAmount !== "number") {
       throw new TypeError("Type of `emojiAmount` must be number.");
     }
+    if (emojiAmount <= 0) {
+      throw new RangeError("`emojiAmount` must be a positive number.");
+    }
 
     const encoder = new TextEncoder();
     const bytes = encoder.encode(hiddenText);
