@@ -108,6 +108,13 @@ class EmojiSteganography {
     emojiAmount,
     controllers,
   ) {
+    if (typeof plaintext !== "string" || typeof hiddenText !== "string") {
+      throw new TypeError("Type of `plaintext` and `hiddenText` must be string.");
+    }
+    if (typeof emojiAmount !== "number") {
+      throw new TypeError("Type of `emojiAmount` must be number.");
+    }
+
     const encoder = new TextEncoder();
     const bytes = encoder.encode(hiddenText);
     /** @type {string[]} */
@@ -229,8 +236,8 @@ class EmojiSteganography {
             );
           }
           // stepZigRight writes the codepoint zig-zag from index length - 2
-          //
           // → length - 1, length - 4 → length - 3 etc.
+          //
           // [ ..., \uFE0F, \uFE03, \uFE0A, \uFE01]
           //           ↑        ↑      ↑       ↑
           //           2        3      0       1
