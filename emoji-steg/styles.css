@@ -37,7 +37,20 @@ main.emoji-steg-container {
   gap: 30px;
 }
 
+@media (max-width: 1150px) {
+  main.emoji-steg-container {
+    min-height: 100vh;
+    height: auto;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    padding: 0 15% 5% 15%;
+    gap: 30px;
+  }
+}
+
 .panel {
+  padding: 33px;
   min-height: fit-content;
   border-radius: 20px;
   flex: 1;
@@ -84,6 +97,20 @@ main.emoji-steg-container {
     border-radius: 4px;
     height: 80%;
     padding: 5px;
+  }
+
+  .input-range {
+    flex: 3;
+    display: flex;
+    gap: 10px;
+
+    input {
+      flex: 5;
+      color: var(--color-text) !important;
+    }
+    label {
+      flex: 1;
+    }
   }
 }
 
@@ -159,6 +186,24 @@ main.emoji-steg-container {
   }
   #encoded-output-container {
     flex: 2;
+  }
+  #emoji-amount-container {
+    flex: 1;
+  }
+  #step-1-right-amount-container {
+    flex: 1;
+  }
+  #step-2-right-amount-container {
+    flex: 1;
+  }
+  #step-1-left-amount-container {
+    flex: 1;
+  }
+  #step-2-left-amount-container {
+    flex: 1;
+  }
+  #step-zig-right-amount-container {
+    flex: 1;
   }
   .processing-button-container {
     flex: 2;
