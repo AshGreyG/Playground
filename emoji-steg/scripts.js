@@ -276,6 +276,17 @@ class EmojiSteganography {
   }
 }
 
+/**
+ * @param {InputEvent} e
+ */
+function handleInputChange(e) {
+  /** @type {string} */
+  const id = e.target.id;
+  /** @type {HTMLLabelElement} */
+  const _elementShow = document.querySelector(`label.input-show#${id}-show`);
+  _elementShow.innerText = e.target.value;
+}
+
 function handleEncode() {
   /** @type {HTMLTextAreaElement} */
   const _elementEmojiCarriers = document.querySelector("#emoji-carrier");
@@ -285,10 +296,31 @@ function handleEncode() {
   const _elementHiddenText = document.querySelector("#hidden-text");
   /** @type {HTMLTextAreaElement} */
   const _elementEncodedOutput = document.querySelector("#encoded-output");
+  /** @type {HTMLInputElement} */
+  const _elementEmojiAmountInput = document.querySelector("input#emoji-amount");
+  /** @type {HTMLInputElement} */
+  const _elementStep1RightInput = document.querySelector("input#step-1-right-amount");
+  /** @type {HTMLInputElement} */
+  const _elementStep2RightInput = document.querySelector("input#step-2-right-amount");
+  /** @type {HTMLInputElement} */
+  const _elementStep1LeftInput = document.querySelector("input#step-1-left-amount");
+  /** @type {HTMLInputElement} */
+  const _elementStep2LeftInput = document.querySelector("input#step-2-left-amount");
+  /** @type {HTMLInputElement} */
+  const _elementStepZigRightInput = document.querySelector("input#step-zig-right-amount");
+  /** @type {HTMLInputElement} */
+  const _elementStepZigLeftInput = document.querySelector("input#step-zig-left-amount");
 
   const emojiCarriers = _elementEmojiCarriers.value;
   const plaintext = _elementPlaintext.value;
   const hiddenText = _elementHiddenText.value;
+  const emojiAmount         = parseInt(_elementEmojiAmountInput.value);
+  const step1RightAmount    = parseInt(_elementStep1RightInput.value);
+  const step2RightAmount    = parseInt(_elementStep2RightInput.value);
+  const step1LeftAmount     = parseInt(_elementStep1LeftInput.value);
+  const step2LeftAmount     = parseInt(_elementStep2LeftInput.value);
+  const stepZigRightAmount  = parseInt(_elementStepZigRightInput.value);
+  const stepZigLeftAmount   = parseInt(_elementStepZigLeftInput.value);
 
   const checkEmojiCarriers = EmojiSteganography.hasEmoji(emojiCarriers);
   const checkPlaintext = EmojiSteganography.hasEmoji(plaintext);
@@ -301,8 +333,15 @@ function handleEncode() {
     _elementEncodedOutput.value = EmojiSteganography.encodeWithRandom(
       plaintext,
       hiddenText,
-      3,
-      {}
+      emojiAmount,
+      {
+        step1RightAmount: step1RightAmount,
+        step2RightAmount: step2RightAmount,
+        step1LeftAmount: step1LeftAmount,
+        step2LeftAmount: step2LeftAmount,
+        stepZigRightAmount: stepZigRightAmount,
+        stepZigLeftAmount: stepZigLeftAmount
+      }
     );
   } else if (!checkEmojiCarriers && checkPlaintext) {
     // When no emoji carriers and there are emojis in plaintext, use plaintext
@@ -310,3 +349,31 @@ function handleEncode() {
   }
 
 }
+
+/** @type {HTMLInputElement} */
+const emojiAmountInput = document.querySelector("input#emoji-amount");
+emojiAmountInput.addEventListener("input", (e) => handleInputChange(e));
+
+/** @type {HTMLInputElement} */
+const step1RightInput = document.querySelector("input#step-1-right-amount");
+step1RightInput.addEventListener("input", (e) => handleInputChange(e));
+
+/** @type {HTMLInputElement} */
+const step2RightInput = document.querySelector("input#step-2-right-amount");
+step2RightInput.addEventListener("input", (e) => handleInputChange(e));
+
+/** @type {HTMLInputElement} */
+const step1LeftInput = document.querySelector("input#step-1-left-amount");
+step1LeftInput.addEventListener("input", (e) => handleInputChange(e));
+
+/** @type {HTMLInputElement} */
+const step2LeftInput = document.querySelector("input#step-2-left-amount");
+step2LeftInput.addEventListener("input", (e) => handleInputChange(e));
+
+/** @type {HTMLInputElement} */
+const stepZigRightInput = document.querySelector("input#step-zig-right-amount");
+stepZigRightInput.addEventListener("input", (e) => handleInputChange(e));
+
+/** @type {HTMLInputElement} */
+const stepZigLeftInput = document.querySelector("input#step-zig-left-amount");
+stepZigLeftInput.addEventListener("input", (e) => handleInputChange(e));
