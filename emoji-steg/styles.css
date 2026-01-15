@@ -39,7 +39,8 @@ main.emoji-steg-container {
 
 @media (max-width: 1150px) {
   main.emoji-steg-container {
-    height: 180vh;
+    min-height: 100vh;
+    height: auto;
     width: 100%;
     display: flex;
     flex-direction: column;
