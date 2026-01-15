@@ -350,30 +350,18 @@ function handleEncode() {
 
 }
 
-/** @type {HTMLInputElement} */
-const emojiAmountInput = document.querySelector("input#emoji-amount");
-emojiAmountInput.addEventListener("input", (e) => handleInputChange(e));
+const emojiRangeIDs = [
+  "emoji-amount",
+  "step-1-right-amount",
+  "step-2-right-amount",
+  "step-1-left-amount",
+  "step-2-left-amount",
+  "step-zig-right-amount",
+  "step-zig-left-amount"
+];
 
-/** @type {HTMLInputElement} */
-const step1RightInput = document.querySelector("input#step-1-right-amount");
-step1RightInput.addEventListener("input", (e) => handleInputChange(e));
-
-/** @type {HTMLInputElement} */
-const step2RightInput = document.querySelector("input#step-2-right-amount");
-step2RightInput.addEventListener("input", (e) => handleInputChange(e));
-
-/** @type {HTMLInputElement} */
-const step1LeftInput = document.querySelector("input#step-1-left-amount");
-step1LeftInput.addEventListener("input", (e) => handleInputChange(e));
-
-/** @type {HTMLInputElement} */
-const step2LeftInput = document.querySelector("input#step-2-left-amount");
-step2LeftInput.addEventListener("input", (e) => handleInputChange(e));
-
-/** @type {HTMLInputElement} */
-const stepZigRightInput = document.querySelector("input#step-zig-right-amount");
-stepZigRightInput.addEventListener("input", (e) => handleInputChange(e));
-
-/** @type {HTMLInputElement} */
-const stepZigLeftInput = document.querySelector("input#step-zig-left-amount");
-stepZigLeftInput.addEventListener("input", (e) => handleInputChange(e));
+for (const id of emojiRangeIDs) {
+  /** @type {HTMLInputElement} */
+  const input = document.querySelector(`input#${id}`);
+  input.addEventListener("input", (e) => handleInputChange(e));
+}
