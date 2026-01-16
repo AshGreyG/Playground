@@ -453,7 +453,7 @@ async function handleCopyEncoded() {
   const _elementEncodedOutput = document.querySelector("textarea#encoded-output");
   try {
     await navigator.clipboard.writeText(_elementEncodedOutput.value);
-    alert(`Successfully copied encoded text '${_elementEncodedOutput.value}' !`);
+    alert("Successfully copied encoded text to clipboard.");
   } catch (error) {
     console.error("Failed to copy, reason: ", error);
   }
