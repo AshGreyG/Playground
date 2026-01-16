@@ -356,7 +356,7 @@ class EmojiSteganography {
           const low4  = (encoded[j + 1].codePointAt() - 0xFE00);
           u8s.push(high4 + low4);
         }
-        result = decoder.decode(new Uint8Array(u8s)).replaceAll("\x00", "");
+        result += decoder.decode(new Uint8Array(u8s)).replaceAll("\x00", "");
       }
     }
     return result;
