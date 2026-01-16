@@ -296,6 +296,8 @@ class EmojiSteganography {
 }
 
 /**
+ * This function is designed for \<input type="range"\>, when element receives
+ * input event it will show the current value at the \<label\> after it
  * @param {InputEvent} e
  */
 function handleInputChange(e) {
@@ -306,6 +308,11 @@ function handleInputChange(e) {
   _elementShow.innerText = e.target.value;
 }
 
+/**
+ * This function is designed for "encode" button. When the button is pressed,
+ * this function will encode plaintext, hidden text and emoji carriers to the
+ * result and show in the output \<textarea\>.
+ */
 function handleEncode() {
   /** @type {HTMLTextAreaElement} */
   const _elementEmojiCarriers = document.querySelector("#emoji-carrier");
@@ -367,6 +374,17 @@ function handleEncode() {
     const emojis = EmojiSteganography.getEmojiList(plaintext);
   }
 
+}
+
+async function handleCopyEncoded() {
+  /** @type {HTMLTextAreaElement} */
+  const _elementEncodedOutput = document.querySelector("textarea#encoded-output");
+  try {
+    await navigator.clipboard.writeText(_elementEncodedOutput.value);
+    alert(`Successfully copied encoded text '${_elementEncodedOutput.value}' !`);
+  } catch (error) {
+    console.error("Failed to copy, reason: ", error);
+  }
 }
 
 const emojiRangeIDs = [
