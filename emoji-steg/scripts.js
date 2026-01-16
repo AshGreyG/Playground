@@ -140,10 +140,24 @@ class EmojiSteganography {
     for (const key in controllers) {
       if (controllers[key]) {
         const controllersKey = key.slice(0, key.indexOf("Amount"));
+        /** @type {number} */
+        let t = controllers[key] ?? 0;
+        /** @type {number} */
+        const p = this.EMOJI_CONTROL[controllersKey].length;
+
+        while (t >= p) {
+          emojiCarriers = [...emojiCarriers,
+            ...this.#randomCherryPick(
+              this.EMOJI_CONTROL[controllersKey],
+              p
+            ),
+          ];
+          t -= p;
+        }
         emojiCarriers = [...emojiCarriers,
           ...this.#randomCherryPick(
             this.EMOJI_CONTROL[controllersKey],
-            controllers[key],
+            t
           ),
         ];
       }
