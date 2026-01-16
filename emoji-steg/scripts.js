@@ -75,6 +75,24 @@ class EmojiSteganography {
     return array;
   }
 
+  /**
+   * @param {string[]} controllerGroup
+   * @param {string} emoji
+   * @returns {boolean}
+   */
+  static #isControllersOrAppendV16(controllerGroup, emoji) {
+    if (emoji.endsWith("\uFE0F")) {
+      if (controllerGroup.includes(emoji)) {
+        return true;
+      } else {
+        const withoutSplitter = emoji.slice(0, emoji.length - 1);
+        return controllerGroup.includes(withoutSplitter);
+      }
+    } else {
+      return controllerGroup.includes(emoji);
+    }
+  }
+
   // Function name starts with '#' is the private function in JS
 
   /**
@@ -191,8 +209,16 @@ class EmojiSteganography {
         variantSelectorCodepoints.push(low4);
       }
 
-      emojiCarriers[index] += "\uFE0F";
+      const withSplitter = emojiCarriers[index] + "\uFE0F";
+      if (withSplitter.match(this.EMOJI_REGEX)[0] === withSplitter) {
+        emojiCarriers[index] += "\uFE0F\uFE0F";
+      } else {
+        emojiCarriers[index] += "\uFE0F";
+      }
       // Use `\uFE0F` as a splitter between emoji and hidden text
+      // Notice some emoji can end with variant selector V16 (which is \uFE0F),
+      // normally they don't end with V16 but after we use V16 as splitter,
+      // <emoji> + V16 can also be matched by the regex...
 
       if (!this.emojiControllers.includes(currentEmoji)) {
         for (const part of variantSelectorCodepoints) {
@@ -292,6 +318,48 @@ class EmojiSteganography {
     });
 
     return encodedTextList.join("");
+  }
+
+  /**
+   * @param {string} encoded
+   * @returns {string}
+   */
+  static decode(encoded) {
+    let result = "";
+    /** @type {RegExpExecArray} */
+    let match;
+    while ((match = this.EMOJI_REGEX.exec(encoded)) !== null) {
+      const emojiEndIndex = match.index + match[0].length - 1;
+      console.log(
+        `Emoji: ${match[0]}\n`,
+        `Emoji Length: ${match[0].length}\n`,
+        `Character at the end of emoji: ${encoded[emojiEndIndex].codePointAt()}\n`,
+        `Character after emoji: ${encoded[emojiEndIndex + 1].codePointAt()}\n`,
+        `Is character after emoji \\uFE0F?: ${encoded[emojiEndIndex + 1] === "\uFE0F"}\n`
+      );
+
+      // Notice some emoji can end with variant selector V16 (which is \uFE0F),
+      // normally they don't end with V16 but after we use V16 as splitter,
+      // <emoji> + V16 can also be matched by the regex...
+
+      let i = emojiEndIndex + 2;
+      while (this.variantSelectors.includes(encoded[i])) i++;
+      const hiddenDataLastIndex = i - 1;
+
+      /** @type {number[]} */
+      const u8s = [];
+      const decoder = new TextDecoder();
+
+      if (!this.#isControllersOrAppendV16(this.emojiControllers, match[0])) {
+        for (let j = emojiEndIndex + 2; j <= hiddenDataLastIndex; j += 2) {
+          const high4 = (encoded[j].codePointAt() - 0xFE00) << 4;
+          const low4  = (encoded[j + 1].codePointAt() - 0xFE00);
+          u8s.push(high4 + low4);
+        }
+        result = decoder.decode(new Uint8Array(u8s)).replaceAll("\x00", "");
+      }
+    }
+    return result;
   }
 }
 
