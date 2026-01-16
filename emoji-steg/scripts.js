@@ -75,6 +75,24 @@ class EmojiSteganography {
     return array;
   }
 
+  /**
+   * @param {string[]} controllerGroup
+   * @param {string} emoji
+   * @returns {boolean}
+   */
+  static #isControllersOrAppendV16(controllerGroup, emoji) {
+    if (emoji.endsWith("\uFE0F")) {
+      if (controllerGroup.includes(emoji)) {
+        return true;
+      } else {
+        const withoutSplitter = emoji.slice(0, emoji.length - 1);
+        return controllerGroup.includes(withoutSplitter);
+      }
+    } else {
+      return controllerGroup.includes(emoji);
+    }
+  }
+
   // Function name starts with '#' is the private function in JS
 
   /**
@@ -191,8 +209,16 @@ class EmojiSteganography {
         variantSelectorCodepoints.push(low4);
       }
 
-      emojiCarriers[index] += "\uFE0F";
+      const withSplitter = emojiCarriers[index] + "\uFE0F";
+      if (withSplitter.match(this.EMOJI_REGEX)[0] === withSplitter) {
+        emojiCarriers[index] += "\uFE0F\uFE0F";
+      } else {
+        emojiCarriers[index] += "\uFE0F";
+      }
       // Use `\uFE0F` as a splitter between emoji and hidden text
+      // Notice some emoji can end with variant selector V16 (which is \uFE0F),
+      // normally they don't end with V16 but after we use V16 as splitter,
+      // <emoji> + V16 can also be matched by the regex...
 
       if (!this.emojiControllers.includes(currentEmoji)) {
         for (const part of variantSelectorCodepoints) {
@@ -288,14 +314,62 @@ class EmojiSteganography {
       const minPos = lastInsertedPos;
       const maxPos = encodedTextList.length;
       const randomPos = Math.floor(Math.random() * (maxPos - minPos + 1)) + minPos;
+      lastInsertedPos = randomPos;
       encodedTextList.splice(randomPos, 0, encodedEmoji);
     });
 
+    // TODO: There is a random choice problem, emoji tends to be added at the
+    // end of encoded text.
+
     return encodedTextList.join("");
+  }
+
+  /**
+   * @param {string} encoded
+   * @returns {string}
+   */
+  static decode(encoded) {
+    let result = "";
+    /** @type {RegExpExecArray} */
+    let match;
+    while ((match = this.EMOJI_REGEX.exec(encoded)) !== null) {
+      const emojiEndIndex = match.index + match[0].length - 1;
+      console.log(
+        `Emoji: ${match[0]}\n`,
+        `Emoji Length: ${match[0].length}\n`,
+        `Character at the end of emoji: ${encoded[emojiEndIndex].codePointAt()}\n`,
+        `Character after emoji: ${encoded[emojiEndIndex + 1].codePointAt()}\n`,
+        `Is character after emoji \\uFE0F?: ${encoded[emojiEndIndex + 1] === "\uFE0F"}\n`
+      );
+
+      // Notice some emoji can end with variant selector V16 (which is \uFE0F),
+      // normally they don't end with V16 but after we use V16 as splitter,
+      // <emoji> + V16 can also be matched by the regex...
+
+      let i = emojiEndIndex + 2;
+      while (this.variantSelectors.includes(encoded[i])) i++;
+      const hiddenDataLastIndex = i - 1;
+
+      /** @type {number[]} */
+      const u8s = [];
+      const decoder = new TextDecoder();
+
+      if (!this.#isControllersOrAppendV16(this.emojiControllers, match[0])) {
+        for (let j = emojiEndIndex + 2; j <= hiddenDataLastIndex; j += 2) {
+          const high4 = (encoded[j].codePointAt() - 0xFE00) << 4;
+          const low4  = (encoded[j + 1].codePointAt() - 0xFE00);
+          u8s.push(high4 + low4);
+        }
+        result += decoder.decode(new Uint8Array(u8s)).replaceAll("\x00", "");
+      }
+    }
+    return result;
   }
 }
 
 /**
+ * This function is designed for \<input type="range"\>, when element receives
+ * input event it will show the current value at the \<label\> after it
  * @param {InputEvent} e
  */
 function handleInputChange(e) {
@@ -306,6 +380,11 @@ function handleInputChange(e) {
   _elementShow.innerText = e.target.value;
 }
 
+/**
+ * This function is designed for "encode" button. When the button is pressed,
+ * this function will encode plaintext, hidden text and emoji carriers to the
+ * result and show in the output \<textarea\>.
+ */
 function handleEncode() {
   /** @type {HTMLTextAreaElement} */
   const _elementEmojiCarriers = document.querySelector("#emoji-carrier");
@@ -367,6 +446,17 @@ function handleEncode() {
     const emojis = EmojiSteganography.getEmojiList(plaintext);
   }
 
+}
+
+async function handleCopyEncoded() {
+  /** @type {HTMLTextAreaElement} */
+  const _elementEncodedOutput = document.querySelector("textarea#encoded-output");
+  try {
+    await navigator.clipboard.writeText(_elementEncodedOutput.value);
+    alert("Successfully copied encoded text to clipboard.");
+  } catch (error) {
+    console.error("Failed to copy, reason: ", error);
+  }
 }
 
 const emojiRangeIDs = [
