@@ -314,8 +314,12 @@ class EmojiSteganography {
       const minPos = lastInsertedPos;
       const maxPos = encodedTextList.length;
       const randomPos = Math.floor(Math.random() * (maxPos - minPos + 1)) + minPos;
+      lastInsertedPos = randomPos;
       encodedTextList.splice(randomPos, 0, encodedEmoji);
     });
+
+    // TODO: There is a random choice problem, emoji tends to be added at the
+    // end of encoded text.
 
     return encodedTextList.join("");
   }
