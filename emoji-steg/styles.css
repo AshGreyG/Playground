@@ -44,8 +44,18 @@ main.emoji-steg-container {
     width: 100%;
     display: flex;
     flex-direction: column;
-    padding: 0 15% 5% 15%;
+    padding: 0 5% 5% 5%;
     gap: 30px;
+  }
+}
+
+@media (max-width: 590px) {
+  .input-container {
+    flex-direction: column !important;
+  }
+
+  .output-container {
+    flex-direction: column !important;
   }
 }
 
