@@ -145,6 +145,11 @@ class EmojiSteganography {
         /** @type {number} */
         const p = this.EMOJI_CONTROL[controllersKey].length;
 
+        if (p <= 0) continue;
+
+        // Avoid potential infinite loop if `this.EMOJI_CONTROL[controllersKey].length`
+        // becomes 0 for some reason.
+
         while (t >= p) {
           emojiCarriers = [...emojiCarriers,
             ...this.#randomCherryPick(
