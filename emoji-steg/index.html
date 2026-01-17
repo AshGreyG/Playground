@@ -50,11 +50,15 @@ If plaintext has emojis then carriers will use emojis in plaintext"
               max="10"
               value="6"
             />
-            <label for="emoji-amount" class="input-show" id="emoji-amount-show">6</label>
+            <label for="emoji-amount" class="input-show" id="emoji-amount-show"
+              >6</label
+            >
           </div>
         </div>
         <div class="input-container" id="step-1-right-amount-container">
-          <label for="step-1-right-amount" class="input-label">Step1Right Amount:</label>
+          <label for="step-1-right-amount" class="input-label"
+            >Step1Right Amount:</label
+          >
           <div class="input-range">
             <input
               type="range"
@@ -64,11 +68,18 @@ If plaintext has emojis then carriers will use emojis in plaintext"
               max="10"
               value="0"
             />
-            <label for="step-1-right-amount" class="input-show" id="step-1-right-amount-show">0</label>
+            <label
+              for="step-1-right-amount"
+              class="input-show"
+              id="step-1-right-amount-show"
+              >0</label
+            >
           </div>
         </div>
         <div class="input-container" id="step-2-right-amount-container">
-          <label for="step-2-right-amount" class="input-label">Step2Right Amount:</label>
+          <label for="step-2-right-amount" class="input-label"
+            >Step2Right Amount:</label
+          >
           <div class="input-range">
             <input
               type="range"
@@ -78,11 +89,18 @@ If plaintext has emojis then carriers will use emojis in plaintext"
               max="10"
               value="0"
             />
-            <label for="step-2-right-amount" class="input-show" id="step-2-right-amount-show">0</label>
+            <label
+              for="step-2-right-amount"
+              class="input-show"
+              id="step-2-right-amount-show"
+              >0</label
+            >
           </div>
         </div>
         <div class="input-container" id="step-1-left-amount-container">
-          <label for="step-1-left-amount" class="input-label">Step1Left Amount:</label>
+          <label for="step-1-left-amount" class="input-label"
+            >Step1Left Amount:</label
+          >
           <div class="input-range">
             <input
               type="range"
@@ -92,11 +110,18 @@ If plaintext has emojis then carriers will use emojis in plaintext"
               max="10"
               value="0"
             />
-            <label for="step-1-left-amount" class="input-show" id="step-1-left-amount-show">0</label>
+            <label
+              for="step-1-left-amount"
+              class="input-show"
+              id="step-1-left-amount-show"
+              >0</label
+            >
           </div>
         </div>
         <div class="input-container" id="step-2-left-amount-container">
-          <label for="step-2-left-amount" class="input-label">Step2Left Amount:</label>
+          <label for="step-2-left-amount" class="input-label"
+            >Step2Left Amount:</label
+          >
           <div class="input-range">
             <input
               type="range"
@@ -106,11 +131,18 @@ If plaintext has emojis then carriers will use emojis in plaintext"
               max="10"
               value="0"
             />
-            <label for="step-2-left-amount" class="input-show" id="step-2-left-amount-show">0</label>
+            <label
+              for="step-2-left-amount"
+              class="input-show"
+              id="step-2-left-amount-show"
+              >0</label
+            >
           </div>
         </div>
         <div class="input-container" id="step-zig-right-amount-container">
-          <label for="step-zig-right-amount" class="input-label">StepZigRight Amount:</label>
+          <label for="step-zig-right-amount" class="input-label"
+            >StepZigRight Amount:</label
+          >
           <div class="input-range">
             <input
               type="range"
@@ -120,11 +152,18 @@ If plaintext has emojis then carriers will use emojis in plaintext"
               max="10"
               value="0"
             />
-            <label for="step-zig-right-amount" class="input-show" id="step-zig-right-amount-show">0</label>
+            <label
+              for="step-zig-right-amount"
+              class="input-show"
+              id="step-zig-right-amount-show"
+              >0</label
+            >
           </div>
         </div>
         <div class="input-container" id="step-zig-left-amount-container">
-          <label for="step-zig-left-amount" class="input-label">StepZigLeft Amount:</label>
+          <label for="step-zig-left-amount" class="input-label"
+            >StepZigLeft Amount:</label
+          >
           <div class="input-range">
             <input
               type="range"
@@ -134,7 +173,12 @@ If plaintext has emojis then carriers will use emojis in plaintext"
               max="10"
               value="0"
             />
-            <label for="step-zig-left-amount" class="input-show" id="step-zig-left-amount-show">0</label>
+            <label
+              for="step-zig-left-amount"
+              class="input-show"
+              id="step-zig-left-amount-show"
+              >0</label
+            >
           </div>
         </div>
         <div class="output-container" id="encoded-output-container">
@@ -161,7 +205,44 @@ If plaintext has emojis then carriers will use emojis in plaintext"
           </div>
         </div>
       </div>
-      <div class="panel" id="decode-panel"></div>
+      <div class="panel" id="decode-panel">
+        <div class="title-container">
+          <h3 class="title">Decode</h3>
+        </div>
+        <div class="input-container" id="encoded-text-container">
+          <label for="encoded-text" class="input-label" id="encoded-text-label"
+            >Encoded Text:</label
+          >
+          <textarea
+            name="encoded-text"
+            id="encoded-text"
+            class="input-textarea"
+          ></textarea>
+        </div>
+        <div class="output-container" id="decoded-text-container">
+          <label for="decoded-text" class="output-label" id="decoded-text-label"
+            >Decoded Text:</label
+          >
+          <textarea
+            name="decoded-text"
+            id="decoded-text"
+            class="output-textarea"
+            disabled
+          ></textarea>
+        </div>
+        <div class="processing-button-container">
+          <div class="decode-button-container">
+            <button class="bg-btn" id="encode-btn" onclick="handleDecode()">
+              Decode
+            </button>
+          </div>
+          <div class="copy-button-container">
+            <button class="bd-btn" id="copy-btn" onclick="handleCopyDecoded()">
+              Copy
+            </button>
+          </div>
+        </div>
+      </div>
     </main>
     <script src="scripts.js"></script>
   </body>

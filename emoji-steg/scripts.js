@@ -448,12 +448,34 @@ function handleEncode() {
 
 }
 
+function handleDecode() {
+  /** @type {HTMLTextAreaElement} */
+  const _elementEncodedText = document.querySelector("#encoded-text");
+  /** @type {HTMLTextAreaElement} */
+  const _elementDecodedText = document.querySelector("#decoded-text");
+
+  const encoded = _elementEncodedText.value;
+  const decoded = EmojiSteganography.decode(encoded);
+  _elementDecodedText.value = decoded;
+}
+
 async function handleCopyEncoded() {
   /** @type {HTMLTextAreaElement} */
   const _elementEncodedOutput = document.querySelector("textarea#encoded-output");
   try {
     await navigator.clipboard.writeText(_elementEncodedOutput.value);
     alert("Successfully copied encoded text to clipboard.");
+  } catch (error) {
+    console.error("Failed to copy, reason: ", error);
+  }
+}
+
+async function handleCopyDecoded() {
+  /** @type {HTMLTextAreaElement} */
+  const _elementDecodedOutput = document.querySelector("textarea#decoded-text");
+  try {
+    await navigator.clipboard.writeText(_elementDecodedOutput.value);
+    alert("Successfully copied decoded text to clipboard.");
   } catch (error) {
     console.error("Failed to copy, reason: ", error);
   }
