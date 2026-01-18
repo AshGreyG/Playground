@@ -313,7 +313,7 @@ class EmojiSteganography {
     emojiCarriers.forEach((encodedEmoji) => {
       const minPos = lastInsertedPos;
       const maxPos = encodedTextList.length;
-      const randomPos = Math.floor(Math.random() * (maxPos - minPos + 1)) + minPos;
+      const randomPos = Math.floor(Math.random() * (maxPos - minPos + 1)) + minPos + 1;
       lastInsertedPos = randomPos;
       encodedTextList.splice(randomPos, 0, encodedEmoji);
     });
@@ -329,7 +329,9 @@ class EmojiSteganography {
    * @returns {string}
    */
   static decode(encoded) {
-    let result = "";
+    /** @type {number[]} */
+    const u8s = [];
+    const decoder = new TextDecoder();
     /** @type {RegExpExecArray} */
     let match;
     while ((match = this.EMOJI_REGEX.exec(encoded)) !== null) {
@@ -350,20 +352,32 @@ class EmojiSteganography {
       while (this.variantSelectors.includes(encoded[i])) i++;
       const hiddenDataLastIndex = i - 1;
 
-      /** @type {number[]} */
-      const u8s = [];
-      const decoder = new TextDecoder();
-
       if (!this.#isControllersOrAppendV16(this.emojiControllers, match[0])) {
         for (let j = emojiEndIndex + 2; j <= hiddenDataLastIndex; j += 2) {
-          const high4 = (encoded[j].codePointAt() - 0xFE00) << 4;
+          const high4 = ((encoded[j].codePointAt() - 0xFE00) & 0b00001111) << 4;
           const low4  = (encoded[j + 1].codePointAt() - 0xFE00);
           u8s.push(high4 + low4);
         }
-        result += decoder.decode(new Uint8Array(u8s)).replaceAll("\x00", "");
+
+      } else {
+        if (this.#isControllersOrAppendV16(this.EMOJI_CONTROL.step1Right, match[0])) {
+          for (let j = emojiEndIndex + 2; j <= hiddenDataLastIndex; j += 2) {
+            const high4 = (encoded[j].codePointAt() - 0xFE00) << 4;
+            const low4  = (encoded[j + 1].codePointAt() - 0xFE00);
+            u8s.push(high4 + low4);
+          }
+
+        } else if (this.#isControllersOrAppendV16(this.EMOJI_CONTROL.step1Right, match[0])) {
+          for (let j = emojiEndIndex + 2; j <= hiddenDataLastIndex; j += 4) {
+            const high4 = (encoded[j].codePointAt() - 0xFE00) << 4;
+            const low4  = (encoded[j + 3].codePointAt() - 0xFE00);
+            u8s.push(high4 + low4);
+          }
+
+        }
       }
     }
-    return result;
+    return decoder.decode(new Uint8Array(u8s)).replaceAll("\x00", "");
   }
 }
 
