@@ -157,6 +157,7 @@ class EmojiSteganography {
     // This step will generate controller emojis
     for (const key in controllers) {
       if (controllers[key]) {
+        /** @type {keyof EmojiSteganography.EMOJI_CONTROL} */
         const controllersKey = key.slice(0, key.indexOf("Amount"));
         /** @type {number} */
         let t = controllers[key] ?? 0;
@@ -395,6 +396,24 @@ function handleInputChange(e) {
 }
 
 /**
+ * @param {InputEvent} e
+ */
+function handleSlidersEnabled(e) {
+  /** @type {string} */
+  const text = e.target.value;
+
+  for (const selector of emojiRangeIDs) {
+    /** @type {HTMLInputElement} */
+    const input = document.querySelector(`input#${selector}`);
+    if (EmojiSteganography.hasEmoji(text)) {
+      input.disabled = true;
+    } else {
+      input.disabled = false;
+    }
+  }
+}
+
+/**
  * This function is designed for "encode" button. When the button is pressed,
  * this function will encode plaintext, hidden text and emoji carriers to the
  * result and show in the output \<textarea\>.
@@ -510,3 +529,11 @@ for (const id of emojiRangeIDs) {
   const input = document.querySelector(`input#${id}`);
   input.addEventListener("input", (e) => handleInputChange(e));
 }
+
+/** @type {HTMLTextAreaElement} */
+const emojiCarriersElement = document.querySelector("textarea#emoji-carrier");
+emojiCarriersElement.addEventListener("input", (e) => handleSlidersEnabled(e));
+
+/** @type {HTMLTextAreaElement} */
+const plaintextElement = document.querySelector("textarea#plaintext");
+plaintextElement.addEventListener("input", (e) => handleSlidersEnabled(e));
