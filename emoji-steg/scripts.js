@@ -76,6 +76,8 @@ class EmojiSteganography {
   }
 
   /**
+   * This function checks whether an emoji and its appending-v16 version is in
+   * given controller group.
    * @param {string[]} controllerGroup
    * @param {string} emoji
    * @returns {boolean}
@@ -135,6 +137,10 @@ class EmojiSteganography {
       throw new Error("No emoji carriers available");
     }
 
+    if (emojiCarriers.length !== positions.length) {
+      throw new Error("Emoji carriers must correspond one by one to their positions");
+    }
+
     const encoder = new TextEncoder();
     const bytes = encoder.encode(hiddenText);
 
@@ -158,6 +164,7 @@ class EmojiSteganography {
       const withSplitter = emojiCarriers[index] + "\uFE0F";
       if (withSplitter.match(this.EMOJI_REGEX)[0] === withSplitter) {
         emojiCarriers[index] += "\uFE0F\uFE0F";
+        // When ended with splitter, emoji + splitter can be matched by emoji regex
       } else {
         emojiCarriers[index] += "\uFE0F";
       }
@@ -212,9 +219,9 @@ class EmojiSteganography {
             const filler = this.variantSelectors[
               Math.floor(Math.random() * this.variantSelectors.length)
             ];
-            emojiCarriers[index] += (this.variantSelectors[
+            emojiCarriers[index] += (filler + this.variantSelectors[
               variantSelectorCodepoints[i]
-            ] + filler);
+            ]);
           }
           // step2Left is same with writing 4 bits from right to left step 2
           // and 4 bits random variant selector fills the gap
@@ -349,6 +356,73 @@ class EmojiSteganography {
       positions.push(Math.floor(Math.random() * (r - l) + l));
     }
 
+    // TODO: check the random positions logic.
+
+    console.log(`The positions of random carriers is ${JSON.stringify(positions)}`)
+
+    return this.#encodeCore(plaintext, hiddenText, emojiCarriers, positions);
+  }
+
+  /**
+   * This function encodes the plaintext, which already has emoji carriers.
+   * @param {string} plaintext
+   * @param {string} hiddenText
+   */
+  static encodeWithPlaintext(
+    plaintext,
+    hiddenText,
+  ) {
+    /** @type {number[]} */
+    const positions = [];
+    /** @type {string[]} */
+    const emojiCarriers = [];
+    /** @type {RegExpExecArray} */
+    let match;
+    while ((match = this.EMOJI_REGEX.exec(plaintext)) !== null) {
+      emojiCarriers.push(match[0]);
+      plaintext = plaintext.replace(match[0], "");
+      positions.push(match.index);
+    }
+    console.log(
+      `This is a method call from function encodeWithPlaintext\n`,
+      `  after replacing all emojis the plaintext becomes to ${plaintext}`
+    );
+    return this.#encodeCore(
+      plaintext,
+      hiddenText,
+      emojiCarriers,
+      positions
+    );
+  }
+
+  /**
+   * @param {string} plaintext
+   * @param {string} hiddenText
+   * @param {string[]} emojiCarriers
+   */
+  static encodeWithEmojiCarriers(
+    plaintext,
+    hiddenText,
+    emojiCarriers,
+  ) {
+    /** @type {number[]} */
+    const positions = [];
+    const plaintextLength = plaintext.length;
+    const emojiCarriersLength = emojiCarriers.length;
+    const step = Math.max(
+      Math.floor((plaintextLength - 1) / emojiCarriersLength),
+      1
+    );
+    // The step can't be 0 otherwise the encoding will malfunction
+
+    for (let i = 0; i < emojiCarriersLength; ++i) {
+      const l = Math.floor(i * step);
+      const r = Math.floor((i + 1) * step);
+      positions.push(Math.floor(Math.random() * (r - l) + l));
+    }
+
+    // TODO: check the random positions logic.
+
     console.log(`The positions of random carriers is ${JSON.stringify(positions)}`)
 
     return this.#encodeCore(plaintext, hiddenText, emojiCarriers, positions);
@@ -366,6 +440,8 @@ class EmojiSteganography {
     let match;
     while ((match = this.EMOJI_REGEX.exec(encoded)) !== null) {
       const emojiEndIndex = match.index + match[0].length - 1;
+      // No matter whether the emoji can combine with splitter, there is always
+      // a splitter between two emojis.
       console.log(
         `Emoji: ${match[0]}\n`,
         `Emoji Length: ${match[0].length}\n`,
@@ -384,27 +460,55 @@ class EmojiSteganography {
 
       if (!this.#isControllersOrAppendV16(this.emojiControllers, match[0])) {
         for (let j = emojiEndIndex + 2; j <= hiddenDataLastIndex; j += 2) {
-          const high4 = ((encoded[j].codePointAt() - 0xFE00) & 0b00001111) << 4;
-          const low4  = (encoded[j + 1].codePointAt() - 0xFE00);
+          const high4 = ((encoded[j    ].codePointAt() - 0xFE00) & 0b00001111) << 4;
+          const low4  = ((encoded[j + 1].codePointAt() - 0xFE00) & 0b00001111);
           u8s.push(high4 + low4);
         }
 
       } else {
         if (this.#isControllersOrAppendV16(this.EMOJI_CONTROL.step1Right, match[0])) {
           for (let j = emojiEndIndex + 2; j <= hiddenDataLastIndex; j += 2) {
-            const high4 = (encoded[j].codePointAt() - 0xFE00) << 4;
-            const low4  = (encoded[j + 1].codePointAt() - 0xFE00);
+            const high4 = ((encoded[j    ].codePointAt() - 0xFE00) & 0b00001111) << 4;
+            const low4  = ((encoded[j + 1].codePointAt() - 0xFE00) & 0b00001111);
             u8s.push(high4 + low4);
           }
 
-        } else if (this.#isControllersOrAppendV16(this.EMOJI_CONTROL.step1Right, match[0])) {
+        } else if (this.#isControllersOrAppendV16(this.EMOJI_CONTROL.step2Right, match[0])) {
           for (let j = emojiEndIndex + 2; j <= hiddenDataLastIndex; j += 4) {
-            const high4 = (encoded[j].codePointAt() - 0xFE00) << 4;
-            const low4  = (encoded[j + 3].codePointAt() - 0xFE00);
+            const high4 = ((encoded[j    ].codePointAt() - 0xFE00) & 0b00001111) << 4;
+            const low4  = ((encoded[j + 2].codePointAt() - 0xFE00) & 0b00001111);
             u8s.push(high4 + low4);
           }
 
+        } else if (this.#isControllersOrAppendV16(this.EMOJI_CONTROL.step1Left, match[0])) {
+          for (let j = hiddenDataLastIndex; j >= emojiEndIndex + 2; j -= 2) {
+            const high4 = ((encoded[j    ].codePointAt() - 0xFE00) & 0b00001111) << 4;
+            const low4  = ((encoded[j - 1].codePointAt() - 0xFE00) & 0b00001111);
+            u8s.push(high4 + low4);
+          }
+
+        } else if (this.#isControllersOrAppendV16(this.EMOJI_CONTROL.step2Left, match[0])) {
+          for (let j = hiddenDataLastIndex; j >= emojiEndIndex + 2; j -= 4) {
+            const high4 = ((encoded[j    ].codePointAt() - 0xFE00) & 0b00001111) << 4;
+            const low4  = ((encoded[j - 2].codePointAt() - 0xFE00) & 0b00001111);
+            u8s.push(high4 + low4);
+          }
+
+        } else if (this.#isControllersOrAppendV16(this.EMOJI_CONTROL.stepZigLeft, match[0])) {
+          for (let j = hiddenDataLastIndex; j >= emojiEndIndex + 2; j -= 2) {
+            const high4 = ((encoded[j - 1].codePointAt() - 0xFE00) & 0b00001111) << 4;
+            const low4  = ((encoded[j    ].codePointAt() - 0xFE00) & 0b00001111);
+            u8s.push(high4 + low4);
+          }
+
+        } else if (this.#isControllersOrAppendV16(this.EMOJI_CONTROL.stepZigRight, match[0])) {
+          for (let j = emojiEndIndex + 2; j <= hiddenDataLastIndex; j += 2) {
+            const high4 = ((encoded[j + 1].codePointAt() - 0xFE00) & 0b00001111) << 4;
+            const low4  = ((encoded[j    ].codePointAt() - 0xFE00) & 0b00001111);
+            u8s.push(high4 + low4);
+          }
         }
+
       }
     }
     return decoder.decode(new Uint8Array(u8s)).replaceAll("\x00", "");
@@ -505,8 +609,16 @@ function handleEncode() {
     );
   } else if (!checkEmojiCarriers && checkPlaintext) {
     // When no emoji carriers and there are emojis in plaintext, use plaintext
-    const emojis = EmojiSteganography.getEmojiList(plaintext);
-
+    _elementEncodedOutput.value = EmojiSteganography.encodeWithPlaintext(
+      plaintext,
+      hiddenText
+    );
+  } else if (checkEmojiCarriers && !checkPlaintext) {
+    _elementEncodedOutput.value = EmojiSteganography.encodeWithEmojiCarriers(
+      plaintext,
+      hiddenText,
+      EmojiSteganography.getEmojiList(emojiCarriers)
+    );
   }
 
 }
