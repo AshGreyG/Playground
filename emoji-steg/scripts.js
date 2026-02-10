@@ -117,81 +117,26 @@ class EmojiSteganography {
   }
 
   /**
-   * Return the emojis list in text
+   * The core procedure of encoding. No matter how the emoji carriers and
+   * their positions were produced.
    * @param {string} plaintext
    * @param {string} hiddenText
-   * @param {number} emojiAmount
-   * @param { {[K in `${keyof typeof this.EMOJI_CONTROL}Amount`]?: number} } [controllers]
+   * @param {string[]} emojiCarriers with controllers
+   * @param {number[]} positions the positions of all emoji carriers
    * @returns {string[]}
    */
-  static encodeWithRandom(
+  static #encodeCore(
     plaintext,
     hiddenText,
-    emojiAmount,
-    controllers,
+    emojiCarriers,
+    positions,
   ) {
-    if (typeof plaintext !== "string" || typeof hiddenText !== "string") {
-      throw new TypeError("Type of `plaintext` and `hiddenText` must be string.");
-    }
-    if (typeof emojiAmount !== "number") {
-      throw new TypeError("Type of `emojiAmount` must be number.");
-    }
-    if (emojiAmount <= 0) {
-      throw new RangeError("`emojiAmount` must be a positive number.");
-    }
-    for (const key in controllers) {
-      if (!this.emojiControllersKey.includes(key)) {
-        throw new TypeError(`Parameter \`controllers\` shouldn't have key \`${key}\``);
-      }
+    if (emojiCarriers.length === 0) {
+      throw new Error("No emoji carriers available");
     }
 
     const encoder = new TextEncoder();
     const bytes = encoder.encode(hiddenText);
-    /** @type {string[]} */
-    let emojiCarriers = [];
-
-    emojiCarriers = [
-      ...this.#randomCherryPick(this.EMOJI_NORMAL, emojiAmount)
-    ];
-
-    // This step will generate controller emojis
-    for (const key in controllers) {
-      if (controllers[key]) {
-        /** @type {keyof EmojiSteganography.EMOJI_CONTROL} */
-        const controllersKey = key.slice(0, key.indexOf("Amount"));
-        /** @type {number} */
-        let t = controllers[key] ?? 0;
-        /** @type {number} */
-        const p = this.EMOJI_CONTROL[controllersKey].length;
-
-        if (p <= 0) continue;
-
-        // Avoid potential infinite loop if `this.EMOJI_CONTROL[controllersKey].length`
-        // becomes 0 for some reason.
-
-        while (t >= p) {
-          emojiCarriers = [...emojiCarriers,
-            ...this.#randomCherryPick(
-              this.EMOJI_CONTROL[controllersKey],
-              p
-            ),
-          ];
-          t -= p;
-        }
-        emojiCarriers = [...emojiCarriers,
-          ...this.#randomCherryPick(
-            this.EMOJI_CONTROL[controllersKey],
-            t
-          ),
-        ];
-      }
-    }
-
-    emojiCarriers = this.#shuffle(emojiCarriers);
-
-    if (emojiCarriers.length === 0) {
-      throw new Error("No emoji carriers available");
-    }
 
     // Calculating chunk size ensuing at least 1 byte variant selectors per emoji
     const chunkSize = Math.ceil(bytes.length * 2 / emojiCarriers.length);
@@ -310,19 +255,103 @@ class EmojiSteganography {
     }
 
     let encodedTextList = plaintext.split("");
-    let lastInsertedPos = 0;
-    emojiCarriers.forEach((encodedEmoji) => {
-      const minPos = lastInsertedPos;
-      const maxPos = encodedTextList.length;
-      const randomPos = Math.floor(Math.random() * (maxPos - minPos + 1)) + minPos + 1;
-      lastInsertedPos = randomPos;
-      encodedTextList.splice(randomPos, 0, encodedEmoji);
+    emojiCarriers.forEach((encodedEmoji, i) => {
+      encodedTextList.splice(positions[i], 0, encodedEmoji);
     });
 
-    // TODO: There is a random choice problem, emoji tends to be added at the
-    // end of encoded text.
-
     return encodedTextList.join("");
+  }
+
+  /**
+   * Return the emojis list in text
+   * @param {string} plaintext
+   * @param {string} hiddenText
+   * @param {number} emojiAmount
+   * @param { {[K in `${keyof typeof this.EMOJI_CONTROL}Amount`]?: number} } [controllers]
+   * @returns {string[]}
+   */
+  static encodeWithRandom(
+    plaintext,
+    hiddenText,
+    emojiAmount,
+    controllers,
+  ) {
+    if (typeof plaintext !== "string" || typeof hiddenText !== "string") {
+      throw new TypeError("Type of `plaintext` and `hiddenText` must be string.");
+    }
+    if (typeof emojiAmount !== "number") {
+      throw new TypeError("Type of `emojiAmount` must be number.");
+    }
+    if (emojiAmount <= 0) {
+      throw new RangeError("`emojiAmount` must be a positive number.");
+    }
+    for (const key in controllers) {
+      if (!this.emojiControllersKey.includes(key)) {
+        throw new TypeError(`Parameter \`controllers\` shouldn't have key \`${key}\``);
+      }
+    }
+
+    /** @type {string[]} */
+    let emojiCarriers = [];
+
+    emojiCarriers = [
+      ...this.#randomCherryPick(this.EMOJI_NORMAL, emojiAmount)
+    ];
+
+    // This step will generate controller emojis
+    for (const key in controllers) {
+      if (controllers[key]) {
+        /** @type {keyof EmojiSteganography.EMOJI_CONTROL} */
+        const controllersKey = key.slice(0, key.indexOf("Amount"));
+        /** @type {number} */
+        let t = controllers[key] ?? 0;
+        /** @type {number} */
+        const p = this.EMOJI_CONTROL[controllersKey].length;
+
+        if (p <= 0) continue;
+
+        // Avoid potential infinite loop if `this.EMOJI_CONTROL[controllersKey].length`
+        // becomes 0 for some reason.
+
+        while (t >= p) {
+          emojiCarriers = [...emojiCarriers,
+            ...this.#randomCherryPick(
+              this.EMOJI_CONTROL[controllersKey],
+              p
+            ),
+          ];
+          t -= p;
+        }
+        emojiCarriers = [...emojiCarriers,
+          ...this.#randomCherryPick(
+            this.EMOJI_CONTROL[controllersKey],
+            t
+          ),
+        ];
+      }
+    }
+
+    emojiCarriers = this.#shuffle(emojiCarriers);
+
+    /** @type {number[]} */
+    const positions = [];
+    const plaintextLength = plaintext.length;
+    const emojiCarriersLength = emojiCarriers.length;
+    const step = Math.max(
+      Math.floor((plaintextLength - 1) / emojiCarriersLength),
+      1
+    );
+    // The step can't be 0 otherwise the encoding will malfunction
+
+    for (let i = 0; i < emojiCarriersLength; ++i) {
+      const l = Math.floor(i * step);
+      const r = Math.floor((i + 1) * step);
+      positions.push(Math.floor(Math.random() * (r - l) + l));
+    }
+
+    console.log(`The positions of random carriers is ${JSON.stringify(positions)}`)
+
+    return this.#encodeCore(plaintext, hiddenText, emojiCarriers, positions);
   }
 
   /**
@@ -477,6 +506,7 @@ function handleEncode() {
   } else if (!checkEmojiCarriers && checkPlaintext) {
     // When no emoji carriers and there are emojis in plaintext, use plaintext
     const emojis = EmojiSteganography.getEmojiList(plaintext);
+
   }
 
 }
