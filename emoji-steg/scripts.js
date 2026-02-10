@@ -440,7 +440,7 @@ class EmojiSteganography {
     let match;
     while ((match = this.EMOJI_REGEX.exec(encoded)) !== null) {
       const emojiEndIndex = match.index + match[0].length - 1;
-      // No matter wether the emoji can combine with splitter, there is always
+      // No matter whether the emoji can combine with splitter, there is always
       // a splitter between two emojis.
       console.log(
         `Emoji: ${match[0]}\n`,
