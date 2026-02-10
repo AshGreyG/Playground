@@ -374,7 +374,7 @@ class EmojiSteganography {
   ) {
     /** @type {number[]} */
     const positions = [];
-    /** @type {string[]]} */
+    /** @type {string[]} */
     const emojiCarriers = [];
     /** @type {RegExpExecArray} */
     let match;
