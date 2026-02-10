@@ -460,51 +460,51 @@ class EmojiSteganography {
 
       if (!this.#isControllersOrAppendV16(this.emojiControllers, match[0])) {
         for (let j = emojiEndIndex + 2; j <= hiddenDataLastIndex; j += 2) {
-          const high4 = ((encoded[j].codePointAt() - 0xFE00) & 0b00001111) << 4;
-          const low4  = (encoded[j + 1].codePointAt() - 0xFE00);
+          const high4 = ((encoded[j    ].codePointAt() - 0xFE00) & 0b00001111) << 4;
+          const low4  = ((encoded[j + 1].codePointAt() - 0xFE00) & 0b00001111);
           u8s.push(high4 + low4);
         }
 
       } else {
         if (this.#isControllersOrAppendV16(this.EMOJI_CONTROL.step1Right, match[0])) {
           for (let j = emojiEndIndex + 2; j <= hiddenDataLastIndex; j += 2) {
-            const high4 = ((encoded[j].codePointAt() - 0xFE00) & 0b00001111) << 4;
-            const low4  = (encoded[j + 1].codePointAt() - 0xFE00);
+            const high4 = ((encoded[j    ].codePointAt() - 0xFE00) & 0b00001111) << 4;
+            const low4  = ((encoded[j + 1].codePointAt() - 0xFE00) & 0b00001111);
             u8s.push(high4 + low4);
           }
 
         } else if (this.#isControllersOrAppendV16(this.EMOJI_CONTROL.step2Right, match[0])) {
           for (let j = emojiEndIndex + 2; j <= hiddenDataLastIndex; j += 4) {
-            const high4 = ((encoded[j].codePointAt() - 0xFE00) & 0b00001111) << 4;
-            const low4  = (encoded[j + 2].codePointAt() - 0xFE00);
+            const high4 = ((encoded[j    ].codePointAt() - 0xFE00) & 0b00001111) << 4;
+            const low4  = ((encoded[j + 2].codePointAt() - 0xFE00) & 0b00001111);
             u8s.push(high4 + low4);
           }
 
         } else if (this.#isControllersOrAppendV16(this.EMOJI_CONTROL.step1Left, match[0])) {
           for (let j = hiddenDataLastIndex; j >= emojiEndIndex + 2; j -= 2) {
-            const high4 = ((encoded[j].codePointAt() - 0xFE00) & 0b00001111) << 4;
-            const low4  = (encoded[j - 1].codePointAt() - 0xFE00);
+            const high4 = ((encoded[j    ].codePointAt() - 0xFE00) & 0b00001111) << 4;
+            const low4  = ((encoded[j - 1].codePointAt() - 0xFE00) & 0b00001111);
             u8s.push(high4 + low4);
           }
 
         } else if (this.#isControllersOrAppendV16(this.EMOJI_CONTROL.step2Left, match[0])) {
           for (let j = hiddenDataLastIndex; j >= emojiEndIndex + 2; j -= 4) {
-            const high4 = ((encoded[j].codePointAt() - 0xFE00) & 0b00001111) << 4;
-            const low4  = (encoded[j - 2].codePointAt() - 0xFE00);
+            const high4 = ((encoded[j    ].codePointAt() - 0xFE00) & 0b00001111) << 4;
+            const low4  = ((encoded[j - 2].codePointAt() - 0xFE00) & 0b00001111);
             u8s.push(high4 + low4);
           }
 
         } else if (this.#isControllersOrAppendV16(this.EMOJI_CONTROL.stepZigLeft, match[0])) {
           for (let j = hiddenDataLastIndex; j >= emojiEndIndex + 2; j -= 2) {
             const high4 = ((encoded[j - 1].codePointAt() - 0xFE00) & 0b00001111) << 4;
-            const low4  = (encoded[j].codePointAt() - 0xFE00);
+            const low4  = ((encoded[j    ].codePointAt() - 0xFE00) & 0b00001111);
             u8s.push(high4 + low4);
           }
 
         } else if (this.#isControllersOrAppendV16(this.EMOJI_CONTROL.stepZigRight, match[0])) {
           for (let j = emojiEndIndex + 2; j <= hiddenDataLastIndex; j += 2) {
             const high4 = ((encoded[j + 1].codePointAt() - 0xFE00) & 0b00001111) << 4;
-            const low4  = (encoded[j].codePointAt() - 0xFE00);
+            const low4  = ((encoded[j    ].codePointAt() - 0xFE00) & 0b00001111);
             u8s.push(high4 + low4);
           }
         }
