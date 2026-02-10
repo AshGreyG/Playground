@@ -364,6 +364,71 @@ class EmojiSteganography {
   }
 
   /**
+   * This function encodes the plaintext, which already has emoji carriers.
+   * @param {string} plaintext
+   * @param {string} hiddenText
+   */
+  static encodeWithPlaintext(
+    plaintext,
+    hiddenText,
+  ) {
+    /** @type {number[]} */
+    const positions = [];
+    /** @type {string[]]} */
+    const emojiCarriers = [];
+    /** @type {RegExpExecArray} */
+    let match;
+    while ((match = this.EMOJI_REGEX.exec(plaintext)) !== null) {
+      emojiCarriers.push(match[0]);
+      plaintext = plaintext.replace(match[0], "");
+      positions.push(match.index);
+    }
+    console.log(
+      `This is a method call from function encodeWithPlaintext\n`,
+      `  after replacing all emojis the plaintext becomes to ${plaintext}`
+    );
+    return this.#encodeCore(
+      plaintext,
+      hiddenText,
+      emojiCarriers,
+      positions
+    );
+  }
+
+  /**
+   * @param {string} plaintext
+   * @param {string} hiddenText
+   * @param {string[]} emojiCarriers
+   */
+  static encodeWithEmojiCarriers(
+    plaintext,
+    hiddenText,
+    emojiCarriers,
+  ) {
+    /** @type {number[]} */
+    const positions = [];
+    const plaintextLength = plaintext.length;
+    const emojiCarriersLength = emojiCarriers.length;
+    const step = Math.max(
+      Math.floor((plaintextLength - 1) / emojiCarriersLength),
+      1
+    );
+    // The step can't be 0 otherwise the encoding will malfunction
+
+    for (let i = 0; i < emojiCarriersLength; ++i) {
+      const l = Math.floor(i * step);
+      const r = Math.floor((i + 1) * step);
+      positions.push(Math.floor(Math.random() * (r - l) + l));
+    }
+
+    // TODO: check the random positions logic.
+
+    console.log(`The positions of random carriers is ${JSON.stringify(positions)}`)
+
+    return this.#encodeCore(plaintext, hiddenText, emojiCarriers, positions);
+  }
+
+  /**
    * @param {string} encoded
    * @returns {string}
    */
@@ -544,8 +609,16 @@ function handleEncode() {
     );
   } else if (!checkEmojiCarriers && checkPlaintext) {
     // When no emoji carriers and there are emojis in plaintext, use plaintext
-    const emojis = EmojiSteganography.getEmojiList(plaintext);
-
+    _elementEncodedOutput.value = EmojiSteganography.encodeWithPlaintext(
+      plaintext,
+      hiddenText
+    );
+  } else if (checkEmojiCarriers && !checkPlaintext) {
+    _elementEncodedOutput.value = EmojiSteganography.encodeWithEmojiCarriers(
+      plaintext,
+      hiddenText,
+      EmojiSteganography.getEmojiList(emojiCarriers)
+    );
   }
 
 }
