@@ -41,6 +41,9 @@ def main() -> int:
     parser.add_argument("--smiles", type=Path, default=DEFAULT_SMI)
     parser.add_argument("--out", type=Path, default=DEFAULT_OUT)
     args = parser.parse_args()
+    args.scores = args.scores if args.scores.is_absolute() else ROOT / args.scores
+    args.smiles = args.smiles if args.smiles.is_absolute() else ROOT / args.smiles
+    args.out = args.out if args.out.is_absolute() else ROOT / args.out
 
     scores = pd.read_csv(args.scores, sep="\t")
     scores = scores[scores["status"] == "ok"].copy()
