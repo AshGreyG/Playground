@@ -40,11 +40,24 @@ def main() -> int:
         reader = csv.DictReader(handle, delimiter="\t")
         for row in reader:
             query_name = row["query_name"]
-            try:
-                props = pubchem_properties(query_name)
-            except (HTTPError, URLError, KeyError, TimeoutError) as exc:
-                failures.append((row["compound_id"], query_name, repr(exc)))
-                continue
+            manual_smiles = row.get("manual_smiles", "").strip()
+            if manual_smiles:
+                props = {
+                    "CID": "",
+                    "ConnectivitySMILES": manual_smiles,
+                    "SMILES": manual_smiles,
+                    "IUPACName": "",
+                    "MolecularFormula": "",
+                    "MolecularWeight": "",
+                }
+                source = "manual structure-derived SMILES"
+            else:
+                try:
+                    props = pubchem_properties(query_name)
+                    source = "PubChem PUG-REST"
+                except (HTTPError, URLError, KeyError, TimeoutError) as exc:
+                    failures.append((row["compound_id"], query_name, repr(exc)))
+                    continue
 
             rows.append(
                 {
@@ -55,10 +68,11 @@ def main() -> int:
                     "iupac_name": props.get("IUPACName", ""),
                     "molecular_formula": props.get("MolecularFormula", ""),
                     "molecular_weight": props.get("MolecularWeight", ""),
-                    "source": "PubChem PUG-REST",
+                    "source": source,
                 }
             )
-            time.sleep(0.2)
+            if not manual_smiles:
+                time.sleep(0.2)
 
     if not rows:
         for compound_id, query_name, error in failures:
@@ -78,6 +92,7 @@ def main() -> int:
         "query_name",
         "group",
         "rationale",
+        "manual_smiles",
         "cid",
         "canonical_smiles",
         "isomeric_smiles",
