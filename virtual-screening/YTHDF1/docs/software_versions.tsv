@@ -1,0 +1,13 @@
+tool	version	notes
+python	3.14.6	system python
+uv	0.11.27	
+rdkit	2026.03.3	available through UV_CACHE_DIR=.uv-cache uv run
+openbabel	3.2.0	
+vina	1.2.7	/home/ashgrey/.opt/bin/vina-1.2.7
+smina	Oct 15 2019	based on AutoDock Vina 1.1.2
+gnina	not installed	optional; CUDA unavailable
+meeko	0.7.1	available through UV_CACHE_DIR=.uv-cache uv run; requires gemmi
+gemmi	0.7.5	Meeko runtime dependency
+fpocket	not installed	optional; skipped for focused m6A-pocket workflow
+gromacs	2026.1-dev	CPU build, GPU disabled
+openmm	not installed	optional; yay installation failed, not required

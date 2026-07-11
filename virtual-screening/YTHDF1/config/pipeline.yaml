@@ -1,0 +1,176 @@
+project:
+  name: ythdf1_virtual_screening
+  target: YTHDF1
+  organism: Homo sapiens
+  uniprot_id: Q9BYJ9
+  objective:
+    Find small molecules predicted to bind the YTHDF1 YTH-domain m6A-recognition
+    pocket.
+receptor:
+  domain: C-terminal YTH domain
+  structure_priority:
+    - YTHDF1 experimental YTH-domain structure, if available
+    - YTHDF1 apo structure aligned to m6A-bound YTH-domain homolog
+    - AlphaFold Q9BYJ9 YTH-domain model as secondary/fallback state
+  selected_structures:
+    - pdb_id: 4RCI
+      chain: A
+      role: primary apo YTHDF1 YTH-domain receptor
+      file: data/receptors/ythdf1_4rci_chainA.pdb
+    - pdb_id: 7QKN
+      chain: A
+      role: pocket reference containing ligand JVF
+      file: data/raw/structures/7QKN.pdb
+  excluded_regions:
+    - Low-confidence or disordered N-terminal regions
+  preparation:
+    ph: 7.4
+    keep_waters: only if structurally conserved and pocket-mediating
+    repair_missing_sidechains: true
+    local_minimization: true
+  ensemble:
+    max_states_initial: 3
+    max_states_production: 5
+pocket:
+  hypothesis: m6A-recognition pocket in YTH domain
+  center_source_priority:
+    - bound m6A or m6A-containing RNA
+    - transferred m6A coordinates from aligned homolog
+    - validated pocket detector centroid
+  grid:
+    center_xyz:
+      - 41.619
+      - 9.349
+      - 45.92
+    size_xyz_angstrom:
+      - 20.0
+      - 20.0
+      - 20.0
+  validation:
+    require_redocking_or_crossdocking: true
+    success_metric: control pose recovers m6A-pocket placement and key contact pattern
+  center_source:
+    7QKN JVF ligand centroid transferred onto 4RCI chain A by YTH-domain
+    CA alignment
+  vina_box_file: data/receptors/ythdf1_7qkn_chainA_vina_box.txt
+ligands:
+  libraries:
+    validation_controls: data/ligands/validation_controls.smi
+    focused_library: data/ligands/focused_library.smi
+    broad_library: data/ligands/broad_library.smi
+  preparation:
+    standardize: true
+    desalt: true
+    deduplicate: true
+    enumerate_tautomers: true
+    enumerate_protonation_states_ph: 7.4
+    generate_3d_conformers: true
+    preserve_parent_state_mapping: true
+  filters:
+    pains: true
+    reactive_groups: true
+    aggregators: true
+    metals: true
+    lead_like:
+      molecular_weight:
+        - 180
+        - 500
+      clogp:
+        - -1
+        - 5
+      tpsa:
+        - 20
+        - 140
+      rotatable_bonds_max: 10
+    fragment_like:
+      molecular_weight:
+        - 120
+        - 300
+      clogp:
+        - -1
+        - 3
+      rotatable_bonds_max: 6
+docking:
+  binaries:
+    vina: /home/ashgrey/.opt/bin/vina-1.2.7
+    smina: smina
+  primary_engines:
+    - vina
+    - smina
+  secondary_engines: []
+  cpu_only: true
+  vina:
+    exhaustiveness_validation: 32
+    exhaustiveness_pilot: 8
+    exhaustiveness_production: 8
+    exhaustiveness_redocking: 32
+    num_modes: 20
+    energy_range: 5
+  smina:
+    exhaustiveness_validation: 32
+    exhaustiveness_pilot: 8
+    exhaustiveness_production: 8
+    exhaustiveness_redocking: 32
+    num_modes: 20
+  gnina:
+    enabled: false
+    reason_disabled: CUDA is not available on this machine.
+    use_for: optional only; not required for consensus ranking
+    cnn_scoring: false
+    cnn_rescoring: false
+rescoring:
+  consensus_rank_features:
+    - best_primary_docking_score
+    - median_rank_across_receptor_states
+    - cross_engine_rank_agreement
+    - high_exhaustiveness_redocking_rank
+    - pocket_contact_fingerprint
+    - ligand_efficiency
+    - diversity_cluster
+    - admet_flags
+  optional_methods:
+    - mmgbsa
+    - gromacs_short_md_stability
+  disabled_methods:
+    fpocket:
+      enabled: false
+      reason_disabled:
+        Not installed locally; use m6A-bound structures, transferred
+        ligand coordinates, or manual structural inspection to define the focused
+        YTH pocket.
+    openmm:
+      enabled: false
+      reason_disabled:
+        Local OpenMM installation via yay failed; MD remains optional
+        and can use GROMACS.
+    gnina:
+      enabled: false
+      reason_disabled: CUDA is not available.
+shortlist:
+  pose_inspection_count: 300
+  rescoring_count: 1000
+  final_ranked_hits: 50
+  diverse_purchase_candidates: 20
+  immediate_assay_candidates: 10
+  negative_controls: 10
+outputs:
+  receptor_dir: data/receptors
+  ligand_dir: data/ligands
+  docking_dir: results/docking
+  rescoring_dir: results/rescoring
+  admet_dir: results/admet
+  shortlist_dir: results/shortlist
+  figures_dir: results/figures
+quality_gates:
+  - id: receptor_preparation_review
+    required: true
+    pass_condition: Pocket geometry and protonation states manually inspected.
+  - id: control_redocking
+    required: true
+    pass_condition: Known or transferred control recovers m6A-pocket pose.
+  - id: pilot_screen_review
+    required: true
+    pass_condition: Top poses are chemically plausible after visual inspection.
+  - id: consensus_before_purchase
+    required: true
+    pass_condition: Final compounds pass docking, pose, diversity, and ADMET review.
