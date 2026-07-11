@@ -1,0 +1,5 @@
+.uv-cache/
+.venv/
+data/
+results/
+**/__pycache__
