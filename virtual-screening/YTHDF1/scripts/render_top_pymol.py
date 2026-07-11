@@ -55,8 +55,7 @@ def pymol_script(
     receptor: Path,
     ligand_pdb: Path,
     png: Path,
-    pse: Path,
-    title: str,
+    pse: Path
 ) -> str:
     script = f"""
 reinitialize
@@ -139,8 +138,7 @@ def render(args: argparse.Namespace) -> int:
                 args.receptor,
                 ligand_pdb,
                 png,
-                pse,
-                f"{compound_id} {row.engine}",
+                pse
             )
         )
         result = subprocess.run(
